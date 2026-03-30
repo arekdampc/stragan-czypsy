@@ -1,0 +1,13 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "odlewki-frontend",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "cwd": "/Users/adampc/Documents/odlewki/client",
+      "port": 5173,
+      "autoPort": false
+    }
+  ]
+}
