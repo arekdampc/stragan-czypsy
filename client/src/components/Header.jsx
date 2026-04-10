@@ -19,12 +19,7 @@ export default function Header({ view, setView, cartOpen, setCartOpen }) {
         >
           Sklep
         </button>
-        <button
-          className={`nav-btn ${view === 'admin' ? 'active' : ''}`}
-          onClick={() => setView('admin')}
-        >
-          Operator
-        </button>
+
         <button className="cart-btn" onClick={() => setCartOpen(true)}>
           Koszyk
           {totalQty > 0 && <span className="cart-badge">{totalQty}</span>}
