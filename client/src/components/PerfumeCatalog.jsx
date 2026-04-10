@@ -30,9 +30,10 @@ export default function PerfumeCatalog() {
   const [error, setError] = useState(null);
   const [typeFilter, setTypeFilter] = useState('all');
   const [search, setSearch] = useState('');
-  const [viewMode, setViewMode] = useState(() =>
-    localStorage.getItem('viewMode') || 'grid'
-  );
+  const [viewMode, setViewMode] = useState(() => {
+    if (window.innerWidth < 768) return 'grid';
+    return localStorage.getItem('viewMode') || 'grid';
+  });
 
   function setView(mode) {
     setViewMode(mode);

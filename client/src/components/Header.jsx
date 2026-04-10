@@ -14,6 +14,7 @@ export default function Header({ view, setView, cartOpen, setCartOpen }) {
         <ThemeSwitcher />
         <button
           className={`nav-btn ${view === 'catalog' ? 'active' : ''}`}
+          data-view="catalog"
           onClick={() => setView('catalog')}
         >
           Sklep
