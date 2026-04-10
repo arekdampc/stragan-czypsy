@@ -101,10 +101,11 @@ async function fetchPerfumes() {
       const pricePerMl = parseFloat(r['Cena ml']) || 0;
       const type = parseType(r['Fragrantica']);
       const id = String(r['LP']).trim();
+      const fullName = r['Nazwa'];
 
       return {
         id,
-        fullName: r['Nazwa'],
+        fullName,
         brand,
         name,
         type,
@@ -112,7 +113,7 @@ async function fetchPerfumes() {
         availableMl,
         fullBottlePrice: r['Cena za cały flakon'] || null,
         fragrantica: r['Fragrantica'] || '',
-        image: images[id] || null
+        image: images[fullName] || null
       };
     });
 
@@ -199,19 +200,23 @@ app.get('/api/perfumes', async (req, res) => {
 });
 
 // POST /api/perfumes/:id/image
-app.post('/api/perfumes/:id/image', upload.single('image'), (req, res) => {
+app.post('/api/perfumes/:id/image', upload.single('image'), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'Brak pliku' });
+
+  const perfumes = await fetchPerfumes();
+  const perfume = perfumes.find(p => p.id === req.params.id);
+  const imageKey = perfume ? perfume.fullName : req.params.id;
 
   const images = JSON.parse(fs.readFileSync(IMAGES_FILE));
 
   // Remove old image file if exists
-  if (images[req.params.id]) {
-    const oldFile = path.join(UPLOADS_DIR, path.basename(images[req.params.id]));
+  if (images[imageKey]) {
+    const oldFile = path.join(UPLOADS_DIR, path.basename(images[imageKey]));
     if (fs.existsSync(oldFile)) fs.unlinkSync(oldFile);
   }
 
   const imageUrl = `/uploads/${req.file.filename}`;
-  images[req.params.id] = imageUrl;
+  images[imageKey] = imageUrl;
   fs.writeFileSync(IMAGES_FILE, JSON.stringify(images, null, 2));
 
   // Invalidate cache
@@ -221,13 +226,17 @@ app.post('/api/perfumes/:id/image', upload.single('image'), (req, res) => {
 });
 
 // DELETE /api/perfumes/:id/image
-app.delete('/api/perfumes/:id/image', (req, res) => {
+app.delete('/api/perfumes/:id/image', async (req, res) => {
+  const perfumes = await fetchPerfumes();
+  const perfume = perfumes.find(p => p.id === req.params.id);
+  const imageKey = perfume ? perfume.fullName : req.params.id;
+
   const images = JSON.parse(fs.readFileSync(IMAGES_FILE));
 
-  if (images[req.params.id]) {
-    const oldFile = path.join(UPLOADS_DIR, path.basename(images[req.params.id]));
+  if (images[imageKey]) {
+    const oldFile = path.join(UPLOADS_DIR, path.basename(images[imageKey]));
     if (fs.existsSync(oldFile)) fs.unlinkSync(oldFile);
-    delete images[req.params.id];
+    delete images[imageKey];
     fs.writeFileSync(IMAGES_FILE, JSON.stringify(images, null, 2));
     csvCache = null;
   }
@@ -264,13 +273,17 @@ app.post('/api/perfumes/:id/fetch-image', async (req, res) => {
     const imageUrl = `https://fimgs.net/mdimg/perfume-thumbs/375x500.${fragId}.jpg`;
     const localPath = await downloadImage(imageUrl, req.params.id);
 
+    const perfumes = await fetchPerfumes();
+    const perfume = perfumes.find(p => p.id === req.params.id);
+    const imageKey = perfume ? perfume.fullName : req.params.id;
+
     const images = JSON.parse(fs.readFileSync(IMAGES_FILE));
     // Remove old image file if it was manually uploaded
-    if (images[req.params.id] && images[req.params.id] !== localPath) {
-      const oldFile = path.join(UPLOADS_DIR, path.basename(images[req.params.id]));
+    if (images[imageKey] && images[imageKey] !== localPath) {
+      const oldFile = path.join(UPLOADS_DIR, path.basename(images[imageKey]));
       if (fs.existsSync(oldFile)) try { fs.unlinkSync(oldFile); } catch {}
     }
-    images[req.params.id] = localPath;
+    images[imageKey] = localPath;
     fs.writeFileSync(IMAGES_FILE, JSON.stringify(images, null, 2));
     csvCache = null;
 
@@ -292,7 +305,7 @@ app.post('/api/fetch-all-images', async (req, res) => {
     const results = [];
 
     for (const p of perfumes) {
-      if (!force && images[p.id]) {
+      if (!force && images[p.fullName]) {
         results.push({ id: p.id, name: p.fullName, status: 'skipped', reason: 'już ma zdjęcie' });
         continue;
       }
@@ -314,7 +327,7 @@ app.post('/api/fetch-all-images', async (req, res) => {
           const oldFile = path.join(UPLOADS_DIR, path.basename(images[p.id]));
           if (fs.existsSync(oldFile)) try { fs.unlinkSync(oldFile); } catch {}
         }
-        images[p.id] = localPath;
+        images[p.fullName] = localPath;
         results.push({ id: p.id, name: p.fullName, status: 'ok', imageUrl: localPath });
       } catch (err) {
         results.push({ id: p.id, name: p.fullName, status: 'error', reason: err.message });

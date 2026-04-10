@@ -831,6 +831,49 @@ body {
 
 .error-state { color: #c0392b; }
 
+/* ---- OPERATOR GUARD ---- */
+.operator-guard {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+}
+.operator-guard-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  width: 280px;
+}
+.operator-guard-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.2rem;
+}
+.operator-guard-input {
+  padding: 0.6rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text-primary);
+  font-size: 1rem;
+  outline: none;
+}
+.operator-guard-input:focus { border-color: var(--accent); }
+.operator-guard-input.input-error { border-color: #e74c3c; }
+.operator-guard-error { font-size: 0.8rem; color: #e74c3c; }
+.operator-guard-btn {
+  padding: 0.6rem;
+  background: var(--accent);
+  color: var(--btn-text, #fff);
+  border: none;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  font-weight: 600;
+}
+.operator-guard-btn:hover { opacity: 0.9; }
+
 /* ---- ADMIN PANEL ---- */
 .admin-panel { max-width: 900px; }
 

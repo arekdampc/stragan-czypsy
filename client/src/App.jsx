@@ -4,6 +4,7 @@ import Header from './components/Header';
 import PerfumeCatalog from './components/PerfumeCatalog';
 import Cart from './components/Cart';
 import AdminPanel from './components/AdminPanel';
+import OperatorGuard from './components/OperatorGuard';
 
 export default function App() {
   const [view, setView] = useState('catalog'); // 'catalog' | 'admin'
@@ -20,7 +21,7 @@ export default function App() {
         />
         <main className="main-content">
           {view === 'catalog' && <PerfumeCatalog />}
-          {view === 'admin' && <AdminPanel />}
+          {view === 'admin' && <OperatorGuard><AdminPanel /></OperatorGuard>}
         </main>
         <Cart open={cartOpen} onClose={() => setCartOpen(false)} />
         {cartOpen && <div className="cart-overlay" onClick={() => setCartOpen(false)} />}
